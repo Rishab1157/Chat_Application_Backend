@@ -21,21 +21,27 @@ export function getReceiverSocketId(userId){
 // used to store online users
 const userSocketMap={} // userId:socketId
 
-io.on("connection",(socket)=>{
-    console.log(`A user connected ${socket.id}`.bgYellow)
+io.on("connection", (socket) => {
+  console.log("🔥 SOCKET CONNECTED:", socket.id);
 
-    // coming from authStrore socket function
-    const userId=socket.handshake.query.userId
-    if(userId)userSocketMap[userId]=socket.id
+  const userId = socket.handshake.auth?.userId;
+  console.log("🔥 USER ID:", userId);
 
-    // send event to all connected clients
-    io.emit("getOnlineUsers",Object.keys(userSocketMap))
+  if (!userId) {
+    console.log("⛔ Missing userId, disconnecting");
+    socket.disconnect(true);
+    return;
+  }
 
-    socket.on("disconnect",()=>{
-        console.log(`A user Disconnected ${socket.id}`.bgBlue)
-        delete userSocketMap[userId]
-        io.emit("getOnlineUsers",Object.keys(userSocketMap))
-    })
-})
+  userSocketMap[userId] = socket.id;
+
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+  socket.on("disconnect", () => {
+    delete userSocketMap[userId];
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
+
 
 export {io,app,server};
