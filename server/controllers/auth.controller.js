@@ -46,7 +46,7 @@ export const login = async(req,res,next) => {
 };
 
 export const logout = (req,res,next)=>{
-    res.cookie("jwt","", { maxAge: 0 }); 
+    res.cookie("jwt","", { maxAge: 0,sameSite: 'None',httpOnly: true,secure: true }); 
     return dataSender(res,{message:"success"},200)      
     
 };
